@@ -5,6 +5,7 @@
 		rc irányítása közvetlen joystickkel (xbox one controller)
 */
 #include "lib/joystick/joystick.hh"
+#include <pigpio.h>
 #include <unistd.h>
 #include <iostream>
 
@@ -16,8 +17,18 @@ enum axes {
     BRAKE_REVERSE = 2
 };
 
+#define IDLE_MOTOR_SPEED 1500
+#define FORWARD_MOTOR_SPEED 1560
+#define BACKWARDS_MOTOR_SPEED 1410
+#define ESC_PIN 27
+
 int main(int argc, char** argv)
 {
+    gpioInitialise();
+    gpioSetMode(ESC_PIN, PI_OUTPUT);
+
+    gpioServo(ESC_PIN, IDLE_MOTOR_SPEED);
+
     // Create an instance of Joystick
     Joystick joystick("/dev/input/js0");
 
@@ -69,6 +80,7 @@ int main(int argc, char** argv)
                         if(event.value > JoystickEvent::MIN_AXES_VALUE + AXIS_THRESHOLD){
                             std::cout << "elore" << std::endl;
                             isacc = true;
+                            gpioServo(ESC_PIN, FORWARD_MOTOR_SPEED);
                         }else
                             isacc = false;
                         break;
@@ -77,13 +89,17 @@ int main(int argc, char** argv)
                         if(event.value > JoystickEvent::MIN_AXES_VALUE + AXIS_THRESHOLD){
                             std::cout << "hatra / fek" << std::endl;
                             isbrake = true;
+                            gpioServo(ESC_PIN, BACKWARDS_MOTOR_SPEED);
                         }else{
                             isbrake = false;
                         }
                 }
             }
         }
-        if(!isbrake && !isacc)
+        if(!isbrake && !isacc){
+            gpioServo(ESC_PIN, IDLE_MOTOR_SPEED);
             std::cout << "all" << std::endl;
+        }
     }
+    gpioTerminate();
 }

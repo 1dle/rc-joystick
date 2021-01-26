@@ -1,1 +1,1 @@
-g++ joy_control.cpp lib/joystick/joystick.cc -std=c++0x -Wall -o jc
+g++ joy_control.cpp lib/joystick/joystick.cc -std=c++0x -Wall -o jc -lpigpio -lrt
