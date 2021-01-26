@@ -22,12 +22,18 @@ enum axes {
 #define BACKWARDS_MOTOR_SPEED 1410
 #define ESC_PIN 27
 
+#define STEER_PIN 17
+#define STEER_CENTER 730
+#define STEER_MAX_ANGLE 175
+
 int main(int argc, char** argv)
 {
     gpioInitialise();
     gpioSetMode(ESC_PIN, PI_OUTPUT);
+    gpioSetMode(STEER_PIN, PI_OUTPUT);
 
     gpioServo(ESC_PIN, IDLE_MOTOR_SPEED);
+    gpioServo(STEER_PIN, STEER_CENTER);
 
     // Create an instance of Joystick
     Joystick joystick("/dev/input/js0");
@@ -67,12 +73,17 @@ int main(int argc, char** argv)
                         if(event.value < -AXIS_THRESHOLD){
                             //balra
                             //hány százalékra balra a joy?
-                            std::cout << "balra: " << (event.value + 0.0 + AXIS_THRESHOLD) / (JoystickEvent::MIN_AXES_VALUE + AXIS_THRESHOLD) * 100 << "%" << std::endl;
+                            double l_percent = (event.value + 0.0 + AXIS_THRESHOLD) / (JoystickEvent::MIN_AXES_VALUE + AXIS_THRESHOLD);
+                            std::cout << "balra: " <<  l_percent * 100<< "%" << std::endl;
+                            gpioServo(STEER_PIN, STEER_CENTER + l_percent * STEER_MAX_ANGLE);
                         }else if(event.value > AXIS_THRESHOLD){
                             //jobbra mennyire
-                            std::cout << "jobbra: " << (event.value + 0.0 - AXIS_THRESHOLD) / (JoystickEvent::MAX_AXES_VALUE - AXIS_THRESHOLD) * 100 << "%" << std::endl;
+                            double r_percent = (event.value + 0.0 - AXIS_THRESHOLD) / (JoystickEvent::MAX_AXES_VALUE - AXIS_THRESHOLD);
+                            std::cout << "jobbra: " <<  r_percent * 100 << "%" << std::endl;
+                            gpioServo(STEER_PIN, STEER_CENTER - r_percent * STEER_MAX_ANGLE);
                         }else{
                             std::cout << "kozep" << std::endl;
+                            gpioServo(STEER_PIN, STEER_CENTER);
                         }
                         break;
                     case ACCELERATE:
