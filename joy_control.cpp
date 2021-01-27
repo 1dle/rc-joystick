@@ -2,7 +2,7 @@
 	@author: Bence Deli
 	@date: 2020-01-26
 	@description:
-		rc irányítása közvetlen joystickkel (xbox one controller)
+          rc irányítása közvetlen joystickkel (xbox one controller)
 */
 #include "lib/joystick/joystick.hh"
 #include <pigpio.h>
@@ -11,20 +11,20 @@
 
 const int AXIS_THRESHOLD = 0.10 * JoystickEvent::MAX_AXES_VALUE; //ten percent of max value
 
-enum axes {
+enum buttons_axes {
     STEER = 0,
-    ACCELERATE = 5,
-    BRAKE_REVERSE = 2
+    ACCELERATE = 4,//wired: 5, bluetooth: 4
+    BRAKE_REVERSE = 5,//wired: 2, bluetooth: 5
+    QUIT = 11 //menu button on xbox controller
 };
 
 #define IDLE_MOTOR_SPEED 1500
-#define FORWARD_MOTOR_SPEED 1560
-#define BACKWARDS_MOTOR_SPEED 1410
+#define MAX_DIFF_SPEED 200 //400 is dangerous for testing i guess
 #define ESC_PIN 27
 
 #define STEER_PIN 17
-#define STEER_CENTER 730
-#define STEER_MAX_ANGLE 175
+#define STEER_CENTER 700
+#define STEER_MAX_ANGLE 180
 
 int main(int argc, char** argv)
 {
@@ -46,8 +46,9 @@ int main(int argc, char** argv)
     }
 
     bool si, ai, bi; //steer, accelerate, brake is initialized
+    bool quit;
 
-    while (true)
+    while (!quit)
     {
         // Restrict rate
         usleep(1000);
@@ -57,13 +58,16 @@ int main(int argc, char** argv)
         JoystickEvent event;
         if (joystick.sample(&event))
         {
-	  	/*
-	  	if (event.isButton())
-	  	{
-			printf("Button %u is %s\n",
-			event.number,
-			event.value == 0 ? "up" : "down");
-	  	}*/
+            if (event.isButton())
+            {
+                if(event.number == QUIT && event.value){
+                    quit = true;
+                }
+                /*
+                printf("Button %u is %s\n",
+                event.number,
+                event.value == 0 ? "up" : "down");*/
+            }
             if (event.isAxis())
             {
                 //melyik tengelyek?
@@ -87,20 +91,29 @@ int main(int argc, char** argv)
                         }
                         break;
                     case ACCELERATE:
+                        // (-32767; 32767)
+                        // (  0%  ; 100% )
                         if (!ai){ ai = true; break; } //for ignoring first, intialize values
                         if(event.value > JoystickEvent::MIN_AXES_VALUE + AXIS_THRESHOLD){
-                            std::cout << "elore" << std::endl;
+                            double a_percent = (event.value+0.0 + JoystickEvent::MAX_AXES_VALUE - AXIS_THRESHOLD) / (2*JoystickEvent::MAX_AXES_VALUE - AXIS_THRESHOLD );
+                            std::cout << "elore " << a_percent * 100 << "%" << std::endl;
+                            gpioServo(ESC_PIN, IDLE_MOTOR_SPEED + MAX_DIFF_SPEED * a_percent);
+
                             isacc = true;
-                            gpioServo(ESC_PIN, FORWARD_MOTOR_SPEED);
                         }else
                             isacc = false;
                         break;
                     case BRAKE_REVERSE:
                         if (!bi){ bi = true; break; } //for ignoring first, intialize values
                         if(event.value > JoystickEvent::MIN_AXES_VALUE + AXIS_THRESHOLD){
-                            std::cout << "hatra / fek" << std::endl;
+
+                            double b_percent = (event.value+0.0 + JoystickEvent::MAX_AXES_VALUE - AXIS_THRESHOLD) / (2*JoystickEvent::MAX_AXES_VALUE - AXIS_THRESHOLD );
+                            
+                            std::cout << "hatra " << b_percent * 100 << "%" << std::endl;
+                            
+                            gpioServo(ESC_PIN, IDLE_MOTOR_SPEED - MAX_DIFF_SPEED * b_percent);
+
                             isbrake = true;
-                            gpioServo(ESC_PIN, BACKWARDS_MOTOR_SPEED);
                         }else{
                             isbrake = false;
                         }
