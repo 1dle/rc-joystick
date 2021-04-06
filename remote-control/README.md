@@ -8,3 +8,13 @@ The Pi runs only a [pigpiod](http://abyz.me.uk/rpi/pigpio/pigpiod.html) daemon w
 - `send-pigpiod-with-asio.cpp`: Sends packets through TCP socket with asio
 - `send-pigpiod-with-pigpiif.cpp`: Sends the commands with the given interface library
 
+## Communication
+```
+==========   ===========      wireless    ==============   ======================
+|joystick|---|remote pc| )))  network ((( |raspberry pi|---| RC car (esc&servo) |
+==========   ===========    (TCP socket)  ==============   ======================
+              runs one                     runs pigpiod
+           of the programs
+             from  above
+
+```
