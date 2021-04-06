@@ -5,6 +5,6 @@ This one runs directly on the Raspberry Pi wich is connected to the ESC. And the
 
 ```
 ============               ==joy-control.cpp==   /----| ESC | --- Brushed motor
-|(Joystick)| --bluetooth-- |   Raspberry pi  | --|
+|(Joystick)| --bluetooth-- |   Raspberry pi  | -|
 ============               ===================   \----| Steering servo |
 ```
