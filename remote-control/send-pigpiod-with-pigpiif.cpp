@@ -1,7 +1,7 @@
 #include <pigpiod_if2.h>
 #include <iostream>
 #include <unistd.h>
-#include "lib/joystick/joystick.hh"
+#include "../lib/joystick/joystick.hh"
 
 const int steer_servo_gpio = 17;
 
@@ -19,9 +19,9 @@ const int AXIS_THRESHOLD = 0.10 * JoystickEvent::MAX_AXES_VALUE; //ten percent o
 //joystick
 enum buttons_axes {
     STEER = 0,
-    ACCELERATE = 5,//wired: 5, bluetooth: 4
-    BRAKE_REVERSE = 2,//wired: 2, bluetooth: 5
-    QUIT = 7 //menu button on xbox controller, wired: 7, wireless: 11
+    ACCELERATE = 4,//wired: 5, bluetooth: 4
+    BRAKE_REVERSE = 5,//wired: 2, bluetooth: 5
+    QUIT = 11 //menu button on xbox controller, wired: 7, wireless: 11
 };
 
 
