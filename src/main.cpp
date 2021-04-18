@@ -1,9 +1,7 @@
 #include <pigpiod_if2.h>
 #include <iostream>
 #include <unistd.h>
-#include "lib/joystick/joystick.hh"
-
-const int steer_servo_gpio = 17;
+#include <joystick.hh>
 
 #define IDLE_MOTOR_SPEED 1500
 #define MAX_DIFF_SPEED 200 //400 is dangerous for testing i guess
@@ -36,11 +34,19 @@ struct controller {
 
 int main()
 {
-    constexpr controller con = {
+    //g29
+    /*constexpr controller con = {
         { 0, -3276, 3276, 0 }, //steer //10% jobbra és balra
         { 2, 32767, -32767, 32767 }, //acc pedal
         { 3, 32767, -32767, 32767 }, //brake pedal
         23 //quit btn
+    };*/
+    //xbox
+    constexpr controller con = {
+            { 0, -32767, 32767, 0 }, //steer //10% jobbra és balra
+            { 4, -32767, 32767, -32767 }, //acc pedal
+            { 5, 32767, 32767, -32767 }, //brake pedal
+            11 //quit btn
     };
 
 
