@@ -1,29 +1,12 @@
 #include <iostream>
 #include <unistd.h>
-#include "Controller.h"
+#include "ControllerFactory.h"
 #include "RemoteRC.h"
 
 int main()
 {
-    //g29
-    /*constexpr controller con = {
-        { 0, -3276, 3276, 0 }, //steer //10% jobbra és balra
-        { 2, 32767, -32767, 32767 }, //acc pedal
-        { 3, 32767, -32767, 32767 }, //brake pedal
-        23 //quit btn
-    };*/
-    //xbox
-    /*constexpr controller con = {
-            { 0, -32767, 32767, 0 }, //steer //10% jobbra és balra
-            { 4, -32767, 32767, -32767 }, //acc pedal
-            { 5, -32767, 32767, -32767 }, //brake pedal
-            11 //quit btn
-    };*/
-    //xbox one controller
-    const Controller con(Controller::Axis(0,-32767,32767, 0),
-                   Controller::Axis(4,-32767, 32767, -32767),
-                   Controller::Axis(5, -32767, 32767, -32767),
-                   11);
+    //g29 steering wheel
+    const Controller con = ControllerFactory::create(ControllerFactory::XBOX_WIRELESS);
 
     RemoteRC rc(con, "192.168.1.123", "8888");
 
