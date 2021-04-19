@@ -35,10 +35,10 @@ class RemoteRC {
     bool is_braking;
 
     //the controller of the rc car
-    Controller controller;
+    Controller *controller;
 public:
     //also establish the connection to the remote rpi
-    RemoteRC(Controller controller, const std::string& host = "192.168.1.123", const std::string& port = "8888");
+    RemoteRC(Controller *controller, const std::string& host = "192.168.1.123", const std::string& port = "8888");
 
     //close the connection with the rpi
     ~RemoteRC();

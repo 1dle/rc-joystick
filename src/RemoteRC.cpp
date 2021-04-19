@@ -4,11 +4,9 @@
 
 #include "RemoteRC.h"
 
-#include <utility>
-
 bool RemoteRC::steer(double percentage) const {
     //if status is negative that means the connection lost, or any other pigpio error occured
-    int status = 0;
+    int status;
     if(percentage == 0.0){
         //set the steering servo to center
         status = set_servo_pulsewidth(session, steer_pin, center_steer_servo);
@@ -29,7 +27,7 @@ bool RemoteRC::motor_speed(double percentage) const {
     return status >= 0;
 }
 
-RemoteRC::RemoteRC(Controller _controller, const std::string &host, const std::string &port): controller(std::move(_controller)) {
+RemoteRC::RemoteRC(Controller* _controller, const std::string &host, const std::string &port): controller(_controller) {
     //connect to RPi, save session id to a variable
     session = pigpio_start(host.c_str(), port.c_str());
     std::cout << session;
@@ -44,6 +42,7 @@ RemoteRC::~RemoteRC() {
     motor_speed();
     steer();
     pigpio_stop(session);
+    delete controller;
 }
 
 bool RemoteRC::connected() const {
@@ -54,15 +53,15 @@ bool RemoteRC::processRawInput(JoystickEvent &joystickEvent) {
     reset_states();
     bool status = true;
     //if we got the quitbutton input we return false
-    if(joystickEvent.isButton() && joystickEvent.number == controller.getQuitButton() && joystickEvent.value){
+    if(joystickEvent.isButton() && joystickEvent.number == controller->getQuitButton() && joystickEvent.value){
         reset_states();
         return false;
     }
     if(joystickEvent.isAxis()){
-        if(joystickEvent.number == controller.getSteerId()){
+        if(joystickEvent.number == controller->getSteerId()){
             if(abs(joystickEvent.value) >= Controller::getAxisTreshold()){
                 std::cout << "[RAW_STEER_INPUT]: " << joystickEvent.value << " - ";
-                double steering_angle = controller.getSteer().input_as_percentage(joystickEvent.value);
+                double steering_angle = controller->getSteer().input_as_percentage(joystickEvent.value);
                 std::cout << "[STEERING]: " << steering_angle * 100 << std::endl;
                 status = steer(steering_angle);
             }else{
@@ -70,18 +69,18 @@ bool RemoteRC::processRawInput(JoystickEvent &joystickEvent) {
                 status = steer();
             }
             //acceleration input
-        }else if(joystickEvent.number == controller.getAccelerateId()){
+        }else if(joystickEvent.number == controller->getAccelerateId()){
             if(abs(joystickEvent.value) >= Controller::getAxisTreshold()){
-                double acc_percentage = controller.getAcc().input_as_percentage(joystickEvent.value);
+                double acc_percentage = controller->getAcc().input_as_percentage(joystickEvent.value);
                 std::cout << "[FORWARD]: " << acc_percentage * 100 << "%" << std::endl;
                 status = motor_speed(acc_percentage);
                 is_accelerating = true;
             }else
                 is_accelerating = false;
-        }else if(joystickEvent.number == controller.getBrakeId()){
+        }else if(joystickEvent.number == controller->getBrakeId()){
             if((abs(joystickEvent.value) >= Controller::getAxisTreshold())){
 
-                double b_percentage = -controller.getBrakeReverse().input_as_percentage(joystickEvent.value);
+                double b_percentage = -controller->getBrakeReverse().input_as_percentage(joystickEvent.value);
                 std::cout << "[BACKWARDS]: " << b_percentage * 100 << "%" << std::endl;
                 status = motor_speed(b_percentage);
 

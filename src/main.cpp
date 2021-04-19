@@ -6,9 +6,9 @@
 int main()
 {
     //g29 steering wheel
-    const Controller con = ControllerFactory::create(ControllerFactory::XBOX_WIRELESS);
+    Controller* con = ControllerFactory::create(ControllerFactory::XBOX_WIRELESS);
 
-    RemoteRC rc(con, "192.168.1.123", "8888");
+    RemoteRC rc(con);
 
     if(rc.connected()){
         std::cout << "rc connected." << std::endl;
