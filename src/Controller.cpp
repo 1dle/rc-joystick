@@ -5,7 +5,7 @@
 #include "Controller.h"
 
 //static member initialization
-double Controller::axis_treshold = 0.01 * JoystickEvent::MAX_AXES_VALUE;
+double Controller::axis_treshold = 0.005 * JoystickEvent::MAX_AXES_VALUE;
 double Controller::getAxisTreshold() {
     return axis_treshold;
 }

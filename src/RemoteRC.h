@@ -34,9 +34,6 @@ class RemoteRC {
     bool is_accelerating;
     bool is_braking;
 
-    //is steering/accelerating/braking initialized?
-    bool si ,ai, bi;
-
     //the controller of the rc car
     Controller controller;
 public:
@@ -51,15 +48,17 @@ public:
      * steering left: (-180; 0) steering right: (0; +180)
      * center if the param is 0
      * @param percentage
+     * @returns false if the connection lost
      */
-    void steer(double percentage = 0.0) const;
+    bool steer(double percentage = 0.0) const;
 
     /**
      * Sets the speed of the main motor on the RC car
      * accelerate (0-100%), decelerate/brake: (0; -100%)
      * @param percentage
+     * @returns false if the connection lost
      */
-    void motor_speed(double percentage = 0.0) const;
+    bool motor_speed(double percentage = 0.0) const;
 
     //Check if the connection is established.
     bool connected() const;
@@ -71,8 +70,8 @@ public:
      */
     bool processRawInput(JoystickEvent& joystickEvent);
 
+private:
     void reset_states();
-
     bool is_no_motor_input();
 
 };
